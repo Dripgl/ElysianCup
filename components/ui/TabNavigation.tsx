@@ -12,6 +12,7 @@ import TournamentsScreen from '../TournamentScreen';
 import MarketScreen from '../MarketScreen';
 import AccountScreen from '../AccountScreen';
 import TeamScreen from '../TeamScreen';
+import AdminScreen from '@/app/(tabs)/admin';
 
 
 const Tab = createBottomTabNavigator();
@@ -117,6 +118,13 @@ export default function TabNavigation() {
           tabBarIcon: ({ color, size }) => <FontAwesome name="user" size={size} color={color} />,
         }}
       /> */}
+      <Tab.Screen
+        name="Account"
+        component={AdminScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <FontAwesome name="user" size={size} color={color} />,
+        }}
+      />
     </Tab.Navigator>
   );
 }

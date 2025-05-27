@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
-import TopScores from './ui/TopScores';
-import TournamentRanking from './ui/TournamentRanking';
-import MatchSchedule from './ui/MatchSchedule';
+import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { app } from '../app/lib/firebase';
 
 const mockNextMatch = {
   teamA: { name: 'SSC FOX', logo: 'https://via.placeholder.com/100', lastFive: ['win', 'win', 'draw', 'loss', 'win'] },
@@ -10,22 +9,39 @@ const mockNextMatch = {
   date: '2025-06-01T18:00:00',
 };
 
-const mockScorers = [
-  { id: '1', name: 'Player A', goals: 5, team: 'Team A' },
-  { id: '2', name: 'Player B', goals: 4, team: 'Team B' },
-  { id: '3', name: 'Player C', goals: 3, team: 'Team C' },
-];
-
-const mockPodium = [
-  { id: '1', name: 'Player X', points: 50 },
-  { id: '2', name: 'Player Y', points: 45 },
-  { id: '3', name: 'Player Z', points: 42 },
-];
+const db = getFirestore(app);
 
 export default function MatchesScreen() {
-  const [filter, setFilter] = useState<'all' | 'my'>('all');
   const [countdown, setCountdown] = useState('');
+  const [topScorers, setTopScorers] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [matchCalendar, setMatchCalendar] = useState([]);
 
+  // 🔥 Fetch dati da Firestore
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const scorersSnap = await getDocs(collection(db, 'topScorers'));
+        setTopScorers(scorersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+        const calendarSnap = await getDocs(collection(db, 'matchCalendar'));
+        setMatchCalendar(calendarSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (err) {
+        console.error('Errore nel caricamento dati:', err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // 🔥 Listener per la classifica in tempo reale
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'fantateams'), (snapshot) => {
+      setTeams(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 🔥 Countdown aggiornato ogni secondo
   useEffect(() => {
     const interval = setInterval(() => {
       const matchDate = new Date(mockNextMatch.date);
@@ -41,11 +57,11 @@ export default function MatchesScreen() {
         setCountdown(`${days}d ${hours}h ${minutes}m`);
       }
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
-  const renderResultBox = (result: string, index: number) => {
+  // 🔥 Box per risultati recenti
+  const renderResultBox = (result, index) => {
     let bgColor = '#ccc'; // draw
     if (result === 'win') bgColor = 'green';
     else if (result === 'loss') bgColor = 'red';
@@ -54,7 +70,7 @@ export default function MatchesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Next Match */}
+      {/* Prossima Partita */}
       <View style={styles.nextMatchContainer}>
         <Text style={styles.title}>Next Match</Text>
         <View style={styles.teamsRow}>
@@ -75,51 +91,35 @@ export default function MatchesScreen() {
         <Text style={styles.countdown}>{countdown}</Text>
       </View>
 
-      {/* Top Scorers */}
-      <section>
-        <TopScores />
-      </section>
-
-      {/* Weekly Top 3 */}
-      {/* <section>
-        <WeeklyTop3 />
-      </section> */}
-
-      {/* Classifica del Torneo */}
-      <section>
-        <h2>Classifica del Torneo</h2>
-        <TournamentRanking />
-      </section>
-
-      {/* Calendario delle Partite */}
-      <section>
-        <h2>Calendario delle Partite</h2>
-        <MatchSchedule />
-      </section>
-
-      {/* Lista Marcatori */}
-      {/* <Text style={styles.sectionTitle}>Top Scorers</Text>
+      {/* Top Scores */}
+      <Text style={styles.sectionTitle}>Top Scores</Text>
       <FlatList
-        data={mockScorers}
+        data={topScorers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text>{item.name} - {item.team} - Goals: {item.goals}</Text>
-          </View>
+          <Text style={styles.listItem}>{item.name} - {item.points} pts</Text>
         )}
-      /> */}
+      />
 
-      {/* Podio */}
-      <Text style={styles.sectionTitle}>Weekly Top 3</Text>
-      <View style={styles.podium}>
-        {mockPodium.map((player, index) => (
-          <View key={player.id} style={styles.podiumItem}>
-            <Text style={styles.podiumPosition}>{['🥇', '🥈', '🥉'][index]}</Text>
-            <Text>{player.name}</Text>
-            <Text>{player.points} pts</Text>
-          </View>
-        ))}
-      </View>
+      {/* Classifica */}
+      <Text style={styles.sectionTitle}>Classifica in tempo reale</Text>
+      <FlatList
+        data={teams}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Text style={styles.listItem}>{item.coach}: {item.points} punti</Text>
+        )}
+      />
+
+      {/* Calendario Partite */}
+      <Text style={styles.sectionTitle}>Calendario Partite</Text>
+      <FlatList
+        data={matchCalendar}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Text style={styles.listItem}>{item.match} - {item.date}</Text>
+        )}
+      />
     </View>
   );
 }
@@ -130,15 +130,11 @@ const styles = StyleSheet.create({
   title: { color: 'white', fontSize: 20, fontWeight: 'bold', textAlign: 'center' },
   teamsRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginVertical: 15 },
   team: { alignItems: 'center' },
-  logo: { width: 80, height: 80, borderRadius: 40, marginBottom: 10, color: 'white' },
+  logo: { width: 80, height: 80, borderRadius: 40, marginBottom: 10 },
   vs: { color: 'white', fontSize: 18, fontWeight: 'bold' },
   resultsRow: { flexDirection: 'row', marginTop: 5 },
   resultBox: { width: 15, height: 15, marginHorizontal: 2, borderRadius: 3 },
   countdown: { color: 'white', textAlign: 'center', marginTop: 10 },
-  filter: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 10 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginTop: 15 },
-  card: { backgroundColor: '#f0f0f0', padding: 10, marginVertical: 5, borderRadius: 8 },
-  podium: { flexDirection: 'column', justifyContent: 'space-around', marginTop: 10 },
-  podiumItem: { alignItems: 'center' },
-  podiumPosition: { fontSize: 24 },
+  listItem: { fontSize: 16, marginVertical: 5 },
 });
