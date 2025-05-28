@@ -60,8 +60,8 @@ export default function FormationScreen() {
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.container}>
-                <Text style={styles.title}>My Formation</Text>
-                <Text style={styles.formation}>Current Formation: {formation}</Text>
+                <Text style={styles.title}>I Tuoi Gladiatori</Text>
+                <Text style={styles.formation}>Formazione: {formation}</Text>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
                         <Text style={styles.dropdownButtonText}>Formation: {formation}</Text>

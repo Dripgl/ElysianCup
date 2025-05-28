@@ -1,10 +1,11 @@
 // TournamentsScreen.js
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, FlatList,
+  ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList,
   Modal, TextInput, TouchableWithoutFeedback, Keyboard,
   KeyboardAvoidingView, Platform, Alert, Picker
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 const publicTournaments = [
   { id: '1', name: 'Torneo 1', date: '6/12' },
@@ -36,35 +37,43 @@ export default function TournamentsScreen() {
     setJoinModalVisible(false);
   };
 
+  const handleDeleteTournament = (id) => {
+    const updatedTournaments = privateTournaments.filter(item => item.id !== id);
+    setPrivateTournaments(updatedTournaments);
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.pageTitle}>Campionati</Text>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.smallButton} onPress={() => setCreateModalVisible(true)}>
-          <Text style={styles.buttonText}>Crea</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.smallButton} onPress={() => setJoinModalVisible(true)}>
-          <Text style={styles.buttonText}>Partecipa</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.privateSection}>
+      <View style={styles.privateHeader}>
         <Text style={styles.sectionTitle}>Privati</Text>
-        {privateTournaments.length > 0 && (
-          <FlatList
-            data={privateTournaments}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.publicItem}>
-                <Text style={styles.publicName}>{item.name}</Text>
-                <Text style={styles.publicDate}>{`${item.maxTeams} squadre`}</Text>
-              </View>
-            )}
-          />
-        )}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.smallButton} onPress={() => setCreateModalVisible(true)}>
+            <Text style={styles.buttonText}>Crea</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.smallButton} onPress={() => setJoinModalVisible(true)}>
+            <Text style={styles.buttonText}>Partecipa</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
+      <View style={styles.fixedSpace} />
+      {privateTournaments.length > 0 && (
+        <FlatList
+          data={privateTournaments}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.privateItem}>
+              <Text style={styles.publicName}>{item.name}</Text>
+              <View style={styles.rightSection}>
+                <Text style={styles.publicDate}>{`${item.maxTeams} squadre`}</Text>
+                <TouchableOpacity onPress={() => handleDeleteTournament(item.id)}>
+                  <Ionicons name="trash" size={24} color="gray" style={styles.trashIcon} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        />
+      )}
       <View style={styles.publicSection}>
         <View style={styles.publicHeader}>
           <Text style={styles.sectionTitle}>Pubblici</Text>
@@ -83,7 +92,6 @@ export default function TournamentsScreen() {
           )}
         />
       </View>
-
       <Modal visible={createModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setCreateModalVisible(false)}>
@@ -116,7 +124,6 @@ export default function TournamentsScreen() {
           </KeyboardAvoidingView>
         </View>
       </Modal>
-
       <Modal visible={joinModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={() => setJoinModalVisible(false)}>
@@ -134,7 +141,7 @@ export default function TournamentsScreen() {
           </KeyboardAvoidingView>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -142,18 +149,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   pageTitle: { fontSize: 26, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  buttonContainer: { position: 'absolute', top: 10, right: 10, flexDirection: 'row' },
+  privateHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  buttonRow: { flexDirection: 'row' },
   smallButton: { backgroundColor: '#4B0082', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 8, marginLeft: 5 },
   buttonText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
-  privateSection: { paddingVertical: 20, marginTop: 50 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-around' },
-  publicSection: { flex: 1, justifyContent: 'flex-start', marginTop: 40 },
+  privateSection: { paddingVertical: 20 },
+  fixedSpace: { height: 40 },
+  privateItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, backgroundColor: '#f0f0f0', borderRadius: 8, marginBottom: 5 },
+  rightSection: { flexDirection: 'row', alignItems: 'center' },
+  publicSection: { marginTop: 40 },
   publicHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   plusButton: { backgroundColor: '#4B0082', borderRadius: 20, width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
   plusText: { color: '#fff', fontSize: 20 },
   publicItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 10, backgroundColor: '#f0f0f0', borderRadius: 8, marginBottom: 5 },
   publicName: { fontSize: 16, fontWeight: '500' },
-  publicDate: { fontSize: 16, color: '#666' },
+  publicDate: { fontSize: 16, color: '#666', marginRight: 10 },
+  trashIcon: { marginLeft: 5 },
   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   modalBackground: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' },
