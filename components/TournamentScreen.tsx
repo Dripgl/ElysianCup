@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import {
   ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList,
   Modal, TextInput, TouchableWithoutFeedback, Keyboard,
-  KeyboardAvoidingView, Platform, Alert, Picker
+  KeyboardAvoidingView, Platform, Alert
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 
 const publicTournaments = [
