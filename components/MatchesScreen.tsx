@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { app } from '../app/lib/firebase';
+import { app } from '../FirebaseConfig';
 
 const mockNextMatch = {
   teamA: { name: 'SSC FOX', logo: 'https://via.placeholder.com/100', lastFive: ['win', 'win', 'draw', 'loss', 'win'] },

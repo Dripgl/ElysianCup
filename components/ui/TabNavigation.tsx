@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome } from '@expo/vector-icons';
-import { db } from '../../app/lib/firebase';
+import { db } from '../../FirebaseConfig';
 import { collection, onSnapshot } from 'firebase/firestore';
 
 

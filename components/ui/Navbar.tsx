@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { auth } from '../../app/lib/firebase';
+import { auth } from '../../FirebaseConfig';
 import { signOut } from 'firebase/auth';
 
 

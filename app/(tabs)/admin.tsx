@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { app, auth } from '../lib/firebase';
+import { app, auth } from '../../FirebaseConfig';
 import { getFirestore, addDoc, collection } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, Image, TouchableOpacity, Alert } from 'react-native';
-import { auth } from '../app/lib/firebase';
+import { auth } from '../FirebaseConfig';
 import { signOut } from 'firebase/auth';
 
 export default function AccountScreen() {

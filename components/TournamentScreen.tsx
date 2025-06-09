@@ -1,46 +1,108 @@
 // TournamentsScreen.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList,
   Modal, TextInput, TouchableWithoutFeedback, Keyboard,
-  KeyboardAvoidingView, Platform, Alert, Picker
+  KeyboardAvoidingView, Platform, Alert,
+  Animated,
+  SafeAreaView,
+  Button
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
+import { addDoc, collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { db } from '../FirebaseConfig';
 
-const publicTournaments = [
-  { id: '1', name: 'Torneo 1', date: '6/12' },
-  { id: '2', name: 'Torneo 2', date: '10/16' },
-];
+// const publicTournaments = [
+//   { id: '1', name: 'Torneo 1', date: '6/12' },
+//   { id: '2', name: 'Torneo 2', date: '10/16' },
+// ];
 
 export default function TournamentsScreen() {
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [teamModalVisible, setTeamModalVisible] = useState(false);
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const [privateTournaments, setPrivateTournaments] = useState([]);
   const [newTournament, setNewTournament] = useState({
     name: '', maxTeams: '', type: 'Privato', password: '', field: '',
   });
   const [joinPassword, setJoinPassword] = useState('');
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [teams, setTeams] = useState<any[]>([]);
 
-  const handleCreateTournament = () => {
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      const snapshot = await getDocs(collection(db, 'tournaments'));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPrivateTournaments(data);
+    };
+    fetchTournaments();
+  }, []);
+
+  const handleCreateTournament = async () => {
     if (!newTournament.name || !newTournament.maxTeams || (newTournament.type === 'Privato' && !newTournament.password) || !newTournament.field) {
       Alert.alert("Errore", "Compila tutti i campi obbligatori.");
       return;
     }
+    const docRef = await addDoc(collection(db, 'tournaments'), newTournament);
     setPrivateTournaments([...privateTournaments, { ...newTournament, id: Date.now().toString() }]);
     setNewTournament({ name: '', maxTeams: '', type: 'Privato', password: '', field: '' });
     setCreateModalVisible(false);
     Alert.alert("Successo", "Campionato creato con successo!");
   };
 
+  const handleDeleteTournament = async (id: string) => {
+    await deleteDoc(doc(db, 'tournaments', id));
+    setPrivateTournaments(privateTournaments.filter(item => item.id !== id));
+  };
+
+  const openTeamModal = async (tournamentId: string) => {
+    setSelectedTournamentId(tournamentId);
+    const teamsRef = collection(db, 'tournaments', tournamentId, 'teams');
+    const snapshot = await getDocs(teamsRef);
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setTeams(data);
+    setTeamModalVisible(true);
+  };
+
   const handleJoinTournament = () => {
-    console.log('Joining with password:', joinPassword);
+    console.log('Inserisci Parola Chiave:', joinPassword);
     setJoinModalVisible(false);
   };
 
-  const handleDeleteTournament = (id) => {
-    const updatedTournaments = privateTournaments.filter(item => item.id !== id);
-    setPrivateTournaments(updatedTournaments);
+  const addTeam = async () => {
+    if (!newTeamName || !selectedTournamentId) return;
+    const teamsRef = collection(db, 'tournaments', selectedTournamentId, 'teams');
+    const docRef = await addDoc(teamsRef, { name: newTeamName });
+    setTeams([...teams, { id: docRef.id, name: newTeamName }]);
+    setNewTeamName('');
   };
+
+  const deleteTeam = async (teamId: string) => {
+    if (!selectedTournamentId) return;
+    await deleteDoc(doc(db, 'tournaments', selectedTournamentId, 'teams', teamId));
+    setTeams(teams.filter(team => team.id !== teamId));
+    Alert.alert(
+      'Conferma eliminazione',
+      'Sei sicuro di voler eliminare questo campionato?',
+      [
+        {
+          text: 'Annulla',
+          style: 'cancel',
+        },
+        {
+          text: 'Elimina',
+          style: 'destructive',
+          onPress: () => {
+            setPrivateTournaments(privateTournaments.filter(item => item.id !== id));
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -66,9 +128,14 @@ export default function TournamentsScreen() {
               <Text style={styles.publicName}>{item.name}</Text>
               <View style={styles.rightSection}>
                 <Text style={styles.publicDate}>{`${item.maxTeams} squadre`}</Text>
-                <TouchableOpacity onPress={() => handleDeleteTournament(item.id)}>
-                  <Ionicons name="trash" size={24} color="gray" style={styles.trashIcon} />
-                </TouchableOpacity>
+                <View style={styles.rightSection}>
+                  <TouchableOpacity onPress={() => openTeamModal(item.id)}>
+                    <Ionicons name="people" size={24} color="blue" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteTournament(item.id)}>
+                    <Ionicons name="trash" size={24} color="gray" />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           )}
@@ -104,14 +171,6 @@ export default function TournamentsScreen() {
                 onChangeText={(text) => setNewTournament({ ...newTournament, name: text })} />
               <TextInput placeholder="Numero massimo squadre" style={styles.input} keyboardType="numeric" value={newTournament.maxTeams}
                 onChangeText={(text) => setNewTournament({ ...newTournament, maxTeams: text.replace(/[^0-9]/g, '') })} />
-              <Picker
-                selectedValue={newTournament.type}
-                style={styles.input}
-                onValueChange={(itemValue) => setNewTournament({ ...newTournament, type: itemValue, password: itemValue === 'Pubblico' ? '' : newTournament.password })}
-              >
-                <Picker.Item label="Privato" value="Privato" />
-                <Picker.Item label="Pubblico" value="Pubblico" />
-              </Picker>
               <TextInput placeholder="Parola chiave" style={styles.input} editable={newTournament.type === 'Privato'}
                 value={newTournament.password}
                 onChangeText={(text) => setNewTournament({ ...newTournament, password: text })} />
@@ -141,7 +200,7 @@ export default function TournamentsScreen() {
           </KeyboardAvoidingView>
         </View>
       </Modal>
-    </ScrollView>
+    </ScrollView >
   );
 }
 
