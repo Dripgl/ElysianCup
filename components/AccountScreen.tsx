@@ -1,23 +1,74 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button, Image, TouchableOpacity, Alert } from 'react-native';
-import { auth } from '../FirebaseConfig';
-import { signOut } from 'firebase/auth';
+import React, { useEffect, useState } from 'react'; // Aggiunto useState e useEffect
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function AccountScreen() {
-  const user = auth.currentUser;
+  // Lo stato 'user' ora rappresenterà i dati dell'utente dal tuo backend
+  const [user, setUser] = useState<any | null>(null); // Inizialmente null, o recuperato dal contesto/storage
+
+  useEffect(() => {
+    // TODO: Qui dovrai fare una chiamata al tuo backend
+    // per ottenere le informazioni dell'utente loggato.
+    // Oppure, se le informazioni dell'utente sono salvate localmente dopo il login,
+    // le caricherai da lì (es. AsyncStorage o un contesto globale).
+    // Esempio (simulando un recupero dati):
+    const fetchUserData = async () => {
+      // try {
+      //   const response = await fetch('/api/user/profile', {
+      //     headers: { 'Authorization': `Bearer ${tuoTokenUtente}` }
+      //   });
+      //   if (response.ok) {
+      //     const userData = await response.json();
+      //     setUser(userData); // Imposta i dati utente ottenuti dal backend
+      //   } else {
+      //     console.error("Errore nel recupero dati utente:", response.status);
+      //     // Forse l'utente non è autenticato o la sessione è scaduta
+      //     setUser(null);
+      //   }
+      // } catch (error) {
+      //   console.error("Errore di rete nel recupero dati utente:", error);
+      //   setUser(null);
+      // }
+
+      // Dati utente di esempio per la visualizzazione (rimuovi quando integri il backend)
+      setUser({
+        displayName: 'Nome Utente Esempio',
+        email: 'utente.esempio@mail.com',
+        photoURL: 'https://via.placeholder.com/100', // URL di un'immagine segnaposto
+      });
+    };
+
+    fetchUserData();
+  }, []); // L'array vuoto assicura che questo effetto si esegua solo al montaggio
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      Alert.alert('Logged out', 'You have been logged out successfully.');
+      // TODO: Sostituire con una chiamata al tuo backend per gestire il logout.
+      // Questa logica sarà molto simile a quella che abbiamo messo nella Navbar.
+      // Esempio:
+      // const response = await fetch('/api/logout', { method: 'POST' });
+      // if (response.ok) {
+      //   setUser(null); // Pulisce lo stato utente nel frontend
+      //   Alert.alert('Logout Effettuato', 'Sei stato disconnesso con successo.');
+      //   // Reindirizza alla pagina di login, se necessario, anche se _layout.tsx lo gestisce
+      //   // router.replace('/login');
+      // } else {
+      //   Alert.alert('Errore', 'Non è stato possibile effettuare il logout.');
+      // }
+
+      // Simulazione del logout
+      console.log('Simulazione logout da AccountScreen...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setUser(null); // Simula la disconnessione
+      Alert.alert('Logout Effettuato', 'Sei stato disconnesso con successo (simulato).');
+
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error');
+      Alert.alert('Errore', error instanceof Error ? error.message : 'Errore sconosciuto durante il logout');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Account</Text>
+      <Text style={styles.title}>Il Mio Account</Text>
 
       {user ? (
         <View style={styles.profile}>
@@ -25,23 +76,24 @@ export default function AccountScreen() {
             source={{ uri: user.photoURL || 'https://via.placeholder.com/100' }}
             style={styles.avatar}
           />
-          <Text style={styles.info}>{user.displayName || 'User Name'}</Text>
+          <Text style={styles.info}>{user.displayName || 'Nome Utente'}</Text>
           <Text style={styles.info}>{user.email}</Text>
         </View>
       ) : (
-        <Text style={styles.info}>No user logged in</Text>
+        // Questo messaggio verrà visualizzato fino a quando il backend non fornirà i dati utente
+        <Text style={styles.info}>Nessun utente loggato (in attesa del backend)</Text>
       )}
 
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => Alert.alert('Feature coming soon')}>
-        <Text style={styles.buttonText}>Edit Profile</Text>
+      <TouchableOpacity style={styles.button} onPress={() => Alert.alert('Funzionalità in arrivo')}>
+        <Text style={styles.buttonText}>Modifica Profilo</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => Alert.alert('Feature coming soon')}>
-        <Text style={styles.buttonText}>Switch Theme</Text>
+      <TouchableOpacity style={styles.button} onPress={() => Alert.alert('Funzionalità in arrivo')}>
+        <Text style={styles.buttonText}>Cambia Tema</Text>
       </TouchableOpacity>
     </View>
   );

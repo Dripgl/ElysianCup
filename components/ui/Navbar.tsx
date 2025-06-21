@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { auth } from '../../FirebaseConfig';
-import { signOut } from 'firebase/auth';
+import React, { useState } from 'react';
+import { Alert, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'; // Aggiunto Alert
 
 
 export default function Navbar() {
@@ -12,11 +10,36 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         try {
-            await signOut(auth);
+            // TODO: Sostituire con una chiamata al tuo backend per gestire il logout.
+            // Il backend dovrà invalidare la sessione dell'utente o il token JWT.
+            // Esempio (con fetch):
+            // const response = await fetch('/api/logout', {
+            //   method: 'POST',
+            //   headers: {
+            //     'Content-Type': 'application/json',
+            //     // Se usi token JWT, potresti doverlo inviare nell'header:
+            //     // 'Authorization': `Bearer ${tuoTokenUtente}`
+            //   },
+            // });
+
+            // if (response.ok) {
+            //   // Logout riuscito sul backend
+            //   console.log('Logout dal backend riuscito!');
+            // } else {
+            //   // Gestisci l'errore del backend
+            //   console.error('Errore durante il logout dal backend:', response.status);
+            //   Alert.alert('Errore', 'Non è stato possibile effettuare il logout.');
+            // }
+
+            // Simulazione del logout (rimuovi quando implementerai il backend)
+            console.log('Simulazione logout...');
+            await new Promise(resolve => setTimeout(resolve, 500)); // Simula un'operazione asincrona
+
             setMenuVisible(false);
-            router.replace('/login');
+            router.replace('/login'); // Reindirizza alla pagina di login
         } catch (error) {
-            console.error(error);
+            console.error("Errore durante il logout:", error);
+            Alert.alert('Errore', 'Si è verificato un problema durante il logout.');
         }
     };
 
@@ -43,7 +66,8 @@ export default function Navbar() {
                         <TouchableOpacity style={styles.menuItem} onPress={() => { router.push('/market'); setMenuVisible(false); }}>
                             <FontAwesome name="shopping-cart" size={20} /> <Text style={styles.menuText}>Market</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.menuItem} onPress={async () => { await signOut(auth); setMenuVisible(false); router.replace('/login'); }}>
+                        {/* Modificata la funzione di logout per usare handleLogout */}
+                        <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
                             <FontAwesome name="sign-out" size={20} /> <Text style={styles.menuText}>Logout</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.menuItem} onPress={() => { router.push('/'); setMenuVisible(false); }}>

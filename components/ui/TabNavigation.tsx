@@ -1,41 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome } from '@expo/vector-icons';
-import { db } from '../../FirebaseConfig';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 
-
+import AdminScreen from '@/app/(tabs)/admin';
 import HomeScreen from '../HomeScreen';
 import MatchesScreen from '../MatchesScreen';
-import TournamentsScreen from '../TournamentScreen';
-import MarketScreen from '../MarketScreen';
-import AccountScreen from '../AccountScreen';
 import TeamScreen from '../TeamScreen';
-import AdminScreen from '@/app/(tabs)/admin';
+import TournamentsScreen from '../TournamentScreen';
 
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation() {
+  // Questi stati ora dipenderanno dai dati forniti dal tuo backend
   const [tournamentCount, setTournamentCount] = useState(0);
   const [matchCount, setMatchCount] = useState(0);
 
   useEffect(() => {
-    const unsubscribeTournaments = onSnapshot(collection(db, 'tournaments'), (snapshot) => {
-      setTournamentCount(snapshot.size);
-    });
+    // TODO: Qui dovrai fare le chiamate al tuo backend per ottenere il conteggio
+    // di tornei e partite. Non più listener in tempo reale di Firebase.
+    // Ad esempio:
+    // const fetchCounts = async () => {
+    //   try {
+    //     const tournamentsResponse = await fetch('/api/tournaments/count');
+    //     const tournamentsData = await tournamentsResponse.json();
+    //     setTournamentCount(tournamentsData.count);
 
-    const unsubscribeMatches = onSnapshot(collection(db, 'matches'), (snapshot) => {
-      setMatchCount(snapshot.size);
-    });
+    //     const matchesResponse = await fetch('/api/matches/count');
+    //     const matchesData = await matchesResponse.json();
+    //     setMatchCount(matchesData.count);
+    //   } catch (error) {
+    //     console.error("Errore nel recupero dei conteggi:", error);
+    //     // Puoi anche impostare un messaggio di errore o lasciare i conteggi a 0
+    //   }
+    // };
 
-    // Cleanup listener al dismount del componente
-    return () => {
-      unsubscribeTournaments();
-      unsubscribeMatches();
-    };
-  }, []);
+    // fetchCounts(); // Chiamata al backend al montaggio del componente
+
+    // Le funzioni di unsubscribe di Firebase non sono più necessarie.
+    // const unsubscribeTournaments = onSnapshot(collection(db, 'tournaments'), (snapshot) => {
+    //   setTournamentCount(snapshot.size);
+    // });
+
+    // const unsubscribeMatches = onSnapshot(collection(db, 'matches'), (snapshot) => {
+    //   setMatchCount(snapshot.size);
+    // });
+
+    // return () => {
+    //   unsubscribeTournaments();
+    //   unsubscribeMatches();
+    // };
+  }, []); // L'array vuoto assicura che questo effetto si esegua solo al montaggio
 
   const renderIconWithBadge = (iconName: keyof typeof FontAwesome.glyphMap, badgeCount: number, color: string, size: number) => (
     <View>
@@ -72,7 +88,7 @@ export default function TabNavigation() {
         fontSize: 12,
         fontWeight: 'bold',
       },
-      tabBarActiveTintColor: '#4B0082',   // Viola acceso per colore attivo
+      tabBarActiveTintColor: '#4B0082',    // Viola acceso per colore attivo
       tabBarInactiveTintColor: '#999',
     }}
     >
@@ -87,6 +103,7 @@ export default function TabNavigation() {
         name="Matches"
         component={MatchesScreen}
         options={{
+          // Il badgeCount per ora sarà 0 finché non collegherai il backend
           tabBarIcon: ({ color, size }) => renderIconWithBadge('futbol-o', matchCount, color, size),
         }}
       />
@@ -94,6 +111,7 @@ export default function TabNavigation() {
         name="Team"
         component={TeamScreen}
         options={{
+          // Il badgeCount per ora sarà 0 finché non collegherai il backend
           tabBarIcon: ({ color, size }) => renderIconWithBadge('shield', matchCount, color, size),
         }}
       />
@@ -101,9 +119,11 @@ export default function TabNavigation() {
         name="Tournaments"
         component={TournamentsScreen}
         options={{
+          // Il badgeCount per ora sarà 0 finché non collegherai il backend
           tabBarIcon: ({ color, size }) => renderIconWithBadge('trophy', tournamentCount, color, size),
         }}
       />
+      {/* Questi erano commentati, li lascio così. Se servono, andranno decommentati. */}
       {/* <Tab.Screen
         name="Market"
         component={MarketScreen}
@@ -118,6 +138,7 @@ export default function TabNavigation() {
           tabBarIcon: ({ color, size }) => <FontAwesome name="user" size={size} color={color} />,
         }}
       /> */}
+      {/* Hai un Tab.Screen "Account" che punta ad AdminScreen. Assicurati che sia quello che vuoi. */}
       <Tab.Screen
         name="Account"
         component={AdminScreen}

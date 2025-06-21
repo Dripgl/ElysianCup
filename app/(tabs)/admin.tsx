@@ -1,11 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { app, auth } from '../../FirebaseConfig';
-import { getFirestore, addDoc, collection } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
+import React, { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const db = getFirestore(app);
 
 export default function AdminScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -13,14 +9,41 @@ export default function AdminScreen() {
   const router = useRouter();
 
   const handleCreateTournament = async () => {
-    await addDoc(collection(db, 'tournaments'), tournamentData);
-    alert('Torneo creato!');
+    // TODO: Replace with a call to your backend to create a tournament
+    // Example:
+    // try {
+    //   const response = await fetch('/api/tournaments', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(tournamentData),
+    //   });
+    //   if (response.ok) {
+    //     alert('Torneo creato!');
+    //   } else {
+    //     alert('Errore nella creazione del torneo.');
+    //   }
+    // } catch (error) {
+    //   console.error('Errore:', error);
+    //   alert('Errore di rete.');
+    // }
+
+    alert('Torneo creato! (Mock)'); // Placeholder message
     setModalVisible(false);
     setTournamentData({ name: '', maxTeams: '', type: 'Privato', password: '', field: '' });
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    // TODO: Replace with a call to your backend to handle logout
+    // Example:
+    // try {
+    //   const response = await fetch('/api/logout', { method: 'POST' });
+    //   if (response.ok) {
+    //     router.replace('/login');
+    //   }
+    // } catch (error) {
+    //   console.error('Errore:', error);
+    // }
+
     router.replace('/login');
   };
 
