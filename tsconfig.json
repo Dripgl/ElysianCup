@@ -1,28 +1,41 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "target": "es2017",
-    "lib": [
-      "es2017",
-      "dom",
-      "dom.iterable"
-    ],
-    "jsx": "react-native",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "target": "ES2020", 
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"], 
+    "module": "ESNext",
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler", 
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true, 
+    "noEmit": true, 
+    "jsx": "react-jsx", 
+
+    /* Linting */
+    "strict": true, 
+    "noUnusedLocals": true, 
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "*"
-      ]
-    },
-    "noEmit": true,
-    "isolatedModules": true
+      "@/*": ["./src/*"]
+    }
   },
+  "include": [
+    "src",
+    "components",
+    "constants",
+    "hooks",
+    "point",
+    "index.html",
+    "vite.config.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
   "exclude": [
     "node_modules",
     "babel.config.js",
@@ -30,10 +43,5 @@
     ".expo",
     "dist"
   ],
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+  
 }
