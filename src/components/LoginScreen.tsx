@@ -1,7 +1,6 @@
 // src/components/LoginScreen.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// Import specific easing functions and animation types from framer-motion
 import { easeOut, motion, type Transition, type Variants } from "framer-motion";
 import { Lock, Mail, Trophy } from "lucide-react";
 
@@ -11,8 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// You can add local images here, if you have them in your project
-// import stadiumBackgroundDark from '../assets/images/soccer-field.jpg'; // This was marked as unused, so I've commented it out.
+import stadiumBackgroundDark from '../assets/images/soccer-field.jpg';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -24,7 +22,7 @@ const LoginScreen = () => {
     // Simulate API call or login logic
     console.log("Tentativo di Login:", email);
     // Placeholder login - redirect to dashboard
-    navigate("/");
+    navigate("/"); // Reindirizza alla Home/Dashboard dopo il login
   };
 
   // Varianti Framer Motion per un ingresso più fluido
@@ -49,8 +47,7 @@ const LoginScreen = () => {
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20 transform scale-105" // Lievemente ingrandito
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1579952086208-d215b3c58b19?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`
-          // Oppure usa un'immagine locale: `url(${stadiumBackgroundDark})`
+          backgroundImage: `url(${stadiumBackgroundDark})`
         }}
       />
       {/* Overlay scuro con gradiente verso il verde e leggero rumore */}
@@ -80,14 +77,14 @@ const LoginScreen = () => {
                 initial="hidden"
                 animate="visible"
                 className="w-24 h-24 bg-gradient-to-br from-green-600 to-lime-600 rounded-full flex items-center justify-center shadow-lg
-                           border-2 border-green-400/80 transform-gpu" // Bordo più definito, GPU accel
+                             border-2 border-green-400/80 transform-gpu" // Bordo più definito, GPU accel
               >
                 <Trophy className="w-12 h-12 text-white filter drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]" /> {/* Ombra più forte */}
               </motion.div>
             </div>
             <CardTitle className="text-5xl font-black text-green-300 tracking-wide mb-2
                                   [text-shadow:_0_0_10px_rgba(74,222,128,0.7),_0_0_20px_rgba(74,222,128,0.5)]">
-              FantaCalcio Pro
+              Elysian Cup
             </CardTitle>
             <CardDescription className="text-gray-300 text-lg italic opacity-90">
               Accedi al tuo account per gestire la tua squadra
@@ -143,7 +140,7 @@ const LoginScreen = () => {
               </a>
               <p className="text-sm text-gray-400">
                 Non hai un account?{" "}
-                <a href="#" className="text-green-400 hover:underline hover:text-green-300 transition-colors duration-200">
+                <a onClick={() => navigate("/register")} className="cursor-pointer text-green-400 hover:underline hover:text-green-300 transition-colors duration-200">
                   Registrati
                 </a>
               </p>
