@@ -1,147 +1,58 @@
 // src/components/AppSidebar.tsx
-import { Home, Users, Trophy, UserCog, Calendar, Settings, TrendingUp } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-} from "@/components/ui/sidebar";
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 
-const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "La Mia Squadra",
-    url: "/team",
-    icon: Users,
-  },
-  {
-    title: "Leghe",
-    url: "/leagues",
-    icon: Trophy,
-  },
-  {
-    title: "Mercato",
-    url: "/market",
-    icon: TrendingUp,
-  },
-  {
-    title: "Calendario",
-    url: "/calendar",
-    icon: Calendar,
-  },
-];
+// Importa tutte le icone da React Icons
+import { IoHomeOutline, IoPeopleOutline, IoSettingsOutline, IoFootballOutline } from 'react-icons/io5';
+import { RiExchangeDollarLine } from "react-icons/ri";
+import { FaTrophy, FaRankingStar } from 'react-icons/fa6';
 
-const adminItems = [
-  {
-    title: "Gestione Utenti",
-    url: "/admin/users",
-    icon: UserCog,
-  },
-  {
-    title: "Gestione Leghe",
-    url: "/admin/leagues",
-    icon: Trophy,
-  },
-];
+interface AppSidebarProps {
+  onLinkClick?: () => void;
+}
 
-export function AppSidebar() {
+export function AppSidebar({ onLinkClick }: AppSidebarProps) {
   const location = useLocation();
-  const isAdmin = true; // Placeholder per controllo admin, lo renderai dinamico in futuro
+
+  const navItems = [
+    { name: 'Home', icon: IoHomeOutline, path: '/' },
+    { name: 'Squadra', icon: IoPeopleOutline, path: '/team' },
+    { name: 'Mercato', icon: RiExchangeDollarLine, path: '/market' },
+    { name: 'Tornei', icon: IoFootballOutline, path: '/tournaments' },
+    { name: 'Partite', icon: IoFootballOutline, path: '/matches' },
+    { name: 'Classifica', icon: FaRankingStar, path: '/ranking' }, 
+    { name: 'Premi', icon: FaTrophy, path: '/rewards' },
+    { name: 'Account', icon: IoSettingsOutline, path: '/account' },
+  ];
 
   return (
-    <Sidebar className="border-r-2 border-football-green/20">
-      <SidebarHeader className="border-b border-football-green/20 p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-football rounded-full flex items-center justify-center">
-            <Trophy className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="font-bold text-xl text-football-green">Elysian Cup</h1>
-            <p className="text-sm text-muted-foreground">Pro League</p>
-          </div>
-        </div>
-      </SidebarHeader>
+    <aside className="h-full flex flex-col p-4 bg-card text-card-foreground shadow-lg">
+      {/* Logo e nome app */}
+      <div className="mb-8 p-2 text-center">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-football-green to-green-700 text-transparent bg-clip-text">
+          Elysian Cup
+        </h2>
+      </div>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-football-green font-semibold">
-            Menu Principale
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    // Utilizza la prop 'variant' per gestire lo stato attivo/inattivo
-                    // Esempio: variant={location.pathname === item.url ? "active" : "default"}
-                    // Le classi custom rimangono come override o aggiunta
-                    className={`hover:bg-football-green/10 hover:text-football-green transition-all duration-200 ${
-                      location.pathname === item.url ? 'bg-football-green/20 text-football-green font-medium' : ''
-                    }`}
-                  >
-                    <Link to={item.url}>
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-football-gold font-semibold">
-              Area Admin
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      className={`hover:bg-football-gold/10 hover:text-football-gold transition-all duration-200 ${
-                        location.pathname === item.url ? 'bg-football-gold/20 text-football-gold font-medium' : ''
-                      }`}
-                    >
-                      <Link to={item.url}>
-                        <item.icon className="w-5 h-5" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-      </SidebarContent>
-
-      <SidebarFooter className="border-t border-football-green/20 p-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-football-green/10">
-              <Link to="/settings">
-                <Settings className="w-5 h-5" />
-                <span>Impostazioni</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+      {/* Navigazione */}
+      <nav className="flex-1 space-y-2">
+        {navItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            onClick={onLinkClick}
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-lg text-lg font-medium",
+              "hover:bg-accent hover:text-accent-foreground",
+              "transition-colors duration-200",
+              location.pathname === item.path && "bg-accent text-accent-foreground"
+            )}
+          >
+            <item.icon className="h-6 w-6" />
+            {item.name}
+          </Link>
+        ))}
+      </nav>
+    </aside>
   );
 }

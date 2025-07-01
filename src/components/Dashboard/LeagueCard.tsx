@@ -1,10 +1,9 @@
 // src/components/Dashboard/LeagueCard.tsx
-import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge"; 
-import { Users, Lock } from "lucide-react"; // Importa Users per i partecipanti, Lock per lega privata
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-// Definisci i tipi per la League
+// Interfaccia League
 interface League {
   id: string;
   name: string;
@@ -16,33 +15,39 @@ interface League {
   totalPoints: number;
 }
 
-// Definisci i tipi delle props per LeagueCard
+// Interfaccia per le props di LeagueCard
 interface LeagueCardProps {
   league: League;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export const LeagueCard: React.FC<LeagueCardProps> = ({ league }) => {
-  const statusColor = league.status === 'active' ? 'bg-green-600' : league.status === 'pending' ? 'bg-yellow-600' : 'bg-gray-600';
-  const statusText = league.status === 'active' ? 'Attiva' : league.status === 'pending' ? 'In Attesa' : 'Completata';
+export function LeagueCard({ league, className, style }: LeagueCardProps) {
+  const getStatusBadgeVariant = (status: League['status']) => {
+    if (status === 'active') return 'default';
+    if (status === 'pending') return 'secondary';
+    return 'outline';
+  };
 
   return (
-    <Card className="bg-gray-800 text-white border-green-700/40 hover:border-green-600/60 transition-colors">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-semibold text-lg text-green-300">{league.name}</div>
-          <Badge className={`${statusColor} text-white`}>{statusText}</Badge>
-        </div>
-        <div className="flex items-center text-sm text-gray-400 mb-2">
-          <Users className="h-4 w-4 mr-1" />
-          {league.participants}/{league.maxParticipants} Partecipanti
-          {/* Rimuoviamo la prop 'title' che causava l'errore */}
-          {league.isPrivate && <Lock className="h-4 w-4 ml-2 text-gray-500" />}
-        </div>
-        <div className="flex items-center justify-between text-sm mt-3">
-          <div className="text-gray-300">La tua posizione: <span className="font-bold text-green-400">{league.position}°</span></div>
-          <div className="text-gray-300">Punti totali: <span className="font-bold text-green-400">{league.totalPoints}</span></div>
+    <Card className={cn("bg-gray-900 text-white border border-gray-700 hover:shadow-xl transition-shadow duration-200", className)} style={style}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-bold text-football-green">
+          {league.name}
+        </CardTitle>
+        <Badge variant={getStatusBadgeVariant(league.status)}>
+          {league.status.charAt(0).toUpperCase() + league.status.slice(1)}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-gray-300">
+          Partecipanti: {league.participants}/{league.maxParticipants} {league.isPrivate && "(Privata)"}
+        </p>
+        <div className="mt-2 text-sm">
+          <p>La tua Posizione: <span className="font-bold text-football-gold">{league.position}°</span></p>
+          <p>Punti Totali: <span className="font-bold text-football-gold">{league.totalPoints}</span></p>
         </div>
       </CardContent>
     </Card>
   );
-};
+}

@@ -1,11 +1,10 @@
-// src/components/Dashboard/PlayerCard.tsx (o dove si trova il tuo PlayerCard.tsx)
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+// src/components/Dashboard/PlayerCard.tsx
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingDown, TrendingUpIcon, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// interfaccia Player coerente con Market.tsx e Dashboard.tsx
+// Interfaccia Player
 interface Player {
   id: string;
   name: string;
@@ -14,103 +13,66 @@ interface Player {
   value: number;
   points: number;
   trend: 'up' | 'down' | 'stable';
-  photo: string;
+  photo?: string;
 }
 
-// *** Modifica QUI: Aggiungi onAction e showActions all'interfaccia PlayerCardProps ***
+// Interfaccia per le props di PlayerCard
 interface PlayerCardProps {
   player: Player;
   onAction: (playerId: string, action: 'buy' | 'sell' | 'info') => void;
-  showActions?: boolean; // Resa opzionale con '?'
+  showActions?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export function PlayerCard({ player, onAction, showActions = true }: PlayerCardProps) {
-  // `showActions = true` imposta il valore predefinito a true, così non devi specificarlo
-  // ovunque a meno che tu non voglia impostarlo su false.
-
-  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
-    switch (trend) {
-      case 'up':
-        return <TrendingUpIcon className="w-4 h-4 text-green-500" />;
-      case 'down':
-        return <TrendingDown className="w-4 h-4 text-red-500" />;
-      case 'stable':
-      default:
-        return null; // O un'icona di stabilità se ne hai una
-    }
+export function PlayerCard({ player, onAction, showActions = true, className, style }: PlayerCardProps) {
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(value / 1000000) + 'M';
   };
 
-  const getTrendBadgeClass = (trend: 'up' | 'down' | 'stable') => {
-    switch (trend) {
-      case 'up':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'down':
-        return 'bg-red-500 hover:bg-red-600';
-      case 'stable':
-      default:
-        return 'bg-gray-500 hover:bg-gray-600'; // Grigio per stabile
+  const TrendBadge = () => {
+    let text = '';
+    let variant: "default" | "secondary" | "destructive" | "outline" | null | undefined = 'outline';
+
+    if (player.trend === 'up') {
+      text = 'In Crescita';
+      variant = 'default';
+    } else if (player.trend === 'down') {
+      text = 'In Calo';
+      variant = 'destructive';
+    } else { // 'stable'
+      text = 'Stabile';
+      variant = 'secondary';
     }
+
+    return <Badge variant={variant} className="text-xs font-semibold">{text}</Badge>;
   };
 
   return (
-    <Card className="bg-gradient-card border border-gray-700 hover:border-football-green transition-colors">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-bold text-football-green">
-          {player.name}
-        </CardTitle>
+    <Card className={cn("bg-gray-900 text-white border border-gray-700 hover:shadow-xl transition-shadow duration-200", className)} style={style}>
+      <CardContent className="flex items-center p-4 gap-4">
         <img
           src={player.photo}
           alt={player.name}
-          className="w-10 h-10 rounded-full object-cover border border-gray-600"
+          className="w-16 h-16 rounded-full object-cover border-2 border-football-green"
         />
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <CardDescription className="text-muted-foreground">
-          {player.team} - {player.position}
-        </CardDescription>
-        <div className="flex items-center gap-2 text-football-gold font-semibold">
-          <DollarSign className="w-4 h-4" />
-          €{player.value.toLocaleString()}
+        <div className="flex-1">
+          <h3 className="text-lg font-bold text-football-green">{player.name}</h3>
+          <p className="text-sm text-gray-300">{player.team} - {player.position}</p>
+          <div className="flex items-center text-sm mt-1 gap-2">
+            <span className="font-semibold">Valore: {formatCurrency(player.value)}</span>
+            <TrendBadge />
+          </div>
+          <div className="text-sm">Punti: <span className="font-bold text-football-gold">{player.points}</span></div>
         </div>
-        <div className="flex items-center gap-2 text-white text-sm">
-          Punti Stagione: <span className="font-semibold">{player.points}</span>
-        </div>
-        {player.trend && (
-          <Badge className={getTrendBadgeClass(player.trend)}>
-            {getTrendIcon(player.trend)}
-            {player.trend === 'up' && ' In Crescita'}
-            {player.trend === 'down' && ' In Calo'}
-            {player.trend === 'stable' && ' Stabile'}
-          </Badge>
+        {showActions && (
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={() => onAction(player.id, 'buy')}>Compra</Button>
+            <Button variant="destructive" size="sm" onClick={() => onAction(player.id, 'sell')}>Vendi</Button>
+            <Button variant="ghost" size="sm" onClick={() => onAction(player.id, 'info')}>Info</Button>
+          </div>
         )}
       </CardContent>
-      {/* *** Modifica QUI: Condiziona la visualizzazione del CardFooter in base a showActions *** */}
-      {showActions && (
-        <CardFooter className="flex justify-between gap-2 pt-2">
-          <Button
-            variant="secondary"
-            onClick={() => onAction(player.id, 'buy')}
-            className="flex-1 bg-green-700 text-white hover:bg-green-800"
-          >
-            Acquista
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => onAction(player.id, 'sell')}
-            className="flex-1 border-red-500 text-red-500 hover:bg-red-500/10"
-          >
-            Vendi
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onAction(player.id, 'info')}
-            className="text-muted-foreground hover:bg-gray-700"
-          >
-            <Info className="w-4 h-4" />
-          </Button>
-        </CardFooter>
-      )}
     </Card>
   );
 }

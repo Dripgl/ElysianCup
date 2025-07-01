@@ -1,3 +1,4 @@
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
@@ -7,13 +8,8 @@ export default {
   ],
   theme: {
     extend: {
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
-      },
       colors: {
-        // Colori Shadcn UI esistenti
+        // Colori Shadcn UI esistenti (mantienili, sono basati su variabili CSS)
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -54,23 +50,40 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))'
         },
-        // --- Nuovi colori personalizzati ---
-        'football-green': '#32CD32', // Il verde brillante che stai usando
-        'football-gold': '#FFD700',  // Il giallo oro per l'area admin
+        // --- I TUOI colori personalizzati ---
+        'football-green': '#00C853',
+        'football-gold': '#FFD700',
+        'football-dark': '#1A1A2E',
+        'football-card-dark': '#2E2E40',
       },
       backgroundImage: {
-        // --- Nuovi gradienti personalizzati ---
-        'gradient-card': 'linear-gradient(to bottom right, rgba(28, 28, 28, 0.8), rgba(18, 18, 18, 0.9))',
-        'gradient-football': 'linear-gradient(to right, #32CD32, #228B22)', // Gradiente per il logo della sidebar
+        // --- I TUOI gradienti personalizzati ---
+        'gradient-card': 'linear-gradient(135deg, var(--tw-color-gray-800) 0%, var(--tw-color-gray-900) 100%)',
+        'gradient-football': 'linear-gradient(to right, #32CD32, #228B22)',
       },
-      // Potresti avere keyframes e animazioni qui se li hai definiti
-      // keyframes: {
-      //   "fade-in": { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
-      // },
-      // animation: {
-      //   "fade-in": "fade-in 1s ease-out forwards",
-      // },
-    }
+      boxShadow: {
+        '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.5)',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideInRight: {
+          '0%': { opacity: '0', transform: 'translateX(20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.8s ease-out',
+        'slide-in-right': 'slideInRight 0.5s ease-out',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)'
+      },
+    },
   },
   plugins: [require("tailwindcss-animate")],
 }

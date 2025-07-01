@@ -1,69 +1,68 @@
-# React + TypeScript + Vite
+# ElysianCup 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Un'applicazione di fantacalcio moderna e intuitiva, sviluppata con React e TypeScript, che offre una gestione completa della squadra, partecipazione a leghe, e un mercato giocatori dinamico.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Funzionalità Principali
 
-## Expanding the ESLint configuration
+* **Dashboard Personalizzata**: Visualizza rapidamente le statistiche della tua squadra e gli eventi importanti.
+* **Gestione Squadra**: Tieni sotto controllo i tuoi giocatori, il loro valore e le loro prestazioni.
+* **Mercato Giocatori**: Acquista e vendi giocatori per migliorare la tua rosa.
+* **Leghe**: Partecipa a leghe private o pubbliche e sfida i tuoi amici.
+* **Autenticazione**: Processo di login e registrazione sicuro.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Tecnologie Utilizzate
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+* **React**: Per l'interfaccia utente interattiva.
+* **TypeScript**: Per un codice più robusto e privo di errori.
+* **Vite**: Per un ambiente di sviluppo rapido e ottimizzato.
+* **Tailwind CSS**: Per uno styling veloce e reattivo.
+* **Shadcn UI**: Componenti UI riutilizzabili e personalizzabili.
+* **Lucide React**: Libreria di icone.
+* **React Router DOM**: Per la navigazione tra le pagine.
+* **pnpm**: Come gestore di pacchetti.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Iniziare il Progetto
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Segui questi passaggi per avviare il progetto sulla tua macchina locale.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Prerequisiti
+
+Assicurati di aver installato [Node.js](https://nodejs.org/) (versione 18 o superiore) e [pnpm](https://pnpm.io/installation).
+
+### Installazione
+
+1.  **Clona il repository:**
+    ```bash
+    git clone [https://github.com/tuo-utente/tuo-repo.git](https://github.com/tuo-utente/tuo-repo.git)
+    cd tuo-repo-folder
+    ```
+    (Sostituisci `tuo-utente/tuo-repo.git` con il link al tuo repository GitHub/GitLab)
+
+2.  **Installa le dipendenze:**
+    ```bash
+    pnpm install
+    ```
+
+3.  **Inizializza Shadcn UI (se non l'hai già fatto):**
+    ```bash
+    pnpm dlx shadcn-ui@latest init
+    ```
+    Segui le istruzioni nel terminale.
+
+4.  **Aggiungi i componenti Shadcn UI (se necessario):**
+    ```bash
+    pnpm shadcn-ui add button card input badge tabs select toast # e altri che usi
+    ```
+
+### Avvio dell'Applicazione
+
+Per avviare l'applicazione in modalità sviluppo:
+
+```bash
+pnpm run dev

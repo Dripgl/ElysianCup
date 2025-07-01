@@ -1,6 +1,11 @@
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+
+import {
+  IoCheckmarkOutline,    // Icona per il "Check"
+  IoChevronDownOutline,  // Icona per la freccia giù
+  IoChevronUpOutline     // Icona per la freccia su
+} from 'react-icons/io5'; // Importa le icone da react-icons/io5
 
 import { cn } from "@/lib/utils"
 
@@ -24,7 +29,7 @@ const SelectTrigger = React.forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
+      <IoChevronDownOutline className="h-4 w-4 opacity-50" /> {/* Icona Cambiata */}
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -42,7 +47,7 @@ const SelectScrollUpButton = React.forwardRef<
     )}
     {...props}
   >
-    <ChevronUp className="h-4 w-4" />
+    <IoChevronUpOutline className="h-4 w-4" /> {/* Icona Cambiata */}
   </SelectPrimitive.ScrollUpButton>
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
@@ -59,7 +64,7 @@ const SelectScrollDownButton = React.forwardRef<
     )}
     {...props}
   >
-    <ChevronDown className="h-4 w-4" />
+    <IoChevronDownOutline className="h-4 w-4" /> {/* Icona Cambiata */}
   </SelectPrimitive.ScrollDownButton>
 ))
 SelectScrollDownButton.displayName =
@@ -123,7 +128,7 @@ const SelectItem = React.forwardRef<
   >
     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
+        <IoCheckmarkOutline className="h-4 w-4" /> {/* Icona Cambiata */}
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

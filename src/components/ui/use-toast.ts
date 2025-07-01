@@ -1,4 +1,4 @@
-// src/hooks/use-toast.ts
+// src/components/ui/use-toast.ts
 import * as React from "react";
 
 import { ToastActionElement, ToastProps } from "@/components/ui/toast";
@@ -10,16 +10,15 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode; // Questa riga è corretta
 };
 
-// Torna a 'const' e assicurati che sia 'as const'
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
   DISMISS_TOAST: "DISMISS_TOAST",
-  REMOVE_TOAST: "REMOVE_TOAST",
-} as const; // <--- Importante mantenere 'as const' qui!
+  REMOVE_TOAST: "REMOVE_TOAST", // <-- Qui mancava una virgola!
+} as const;
 
 let count = 0;
 
@@ -28,22 +27,21 @@ function genId() {
   return count.toString();
 }
 
-// Modifica il tipo 'Action' per usare i valori stringa di actionTypes
 type Action =
   | {
-      type: typeof actionTypes.ADD_TOAST; // <--- Usa typeof actionTypes.ADD_TOAST
+      type: typeof actionTypes.ADD_TOAST;
       toast: ToasterToast;
     }
   | {
-      type: typeof actionTypes.UPDATE_TOAST; // <--- Usa typeof actionTypes.UPDATE_TOAST
+      type: typeof actionTypes.UPDATE_TOAST;
       toast: Partial<ToasterToast>;
     }
   | {
-      type: typeof actionTypes.DISMISS_TOAST; // <--- Usa typeof actionTypes.DISMISS_TOAST
+      type: typeof actionTypes.DISMISS_TOAST;
       toastId?: ToasterToast["id"];
     }
   | {
-      type: typeof actionTypes.REMOVE_TOAST; // <--- Usa typeof actionTypes.REMOVE_TOAST
+      type: typeof actionTypes.REMOVE_TOAST;
       toastId?: ToasterToast["id"];
     };
 
@@ -84,7 +82,7 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
       };
-    default: // Assicurati che ci sia sempre un default return
+    default: // <-- Aggiunto un caso default per coprire tutti i percorsi di codice
       return state;
   }
 };

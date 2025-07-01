@@ -1,16 +1,24 @@
-import React, { useEffect, useState } from 'react'; // Aggiunto useEffect
-import { Animated, Dimensions, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+// src/components/TeamScreen.tsx
+import { useEffect, useState, useRef } from 'react';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils"; // Per unire le classi Tailwind in modo condizionale
 
-const { width, height } = Dimensions.get('window');
-
-const backgroundImage = require('../assets/images/BkCamp.png');
+// Importa l'immagine del campo
+import backgroundImage from '../assets/images/BkCamp.png'; // Assicurati che il percorso sia corretto
 
 // --- Definizione delle interfacce per i tipi di dati ---
 interface Player {
   id: string;
   name: string;
-  x: number; // Posizione percentuale X sul campo
-  y: number; // Posizione percentuale Y sul campo
+  x: number; // Posizione percentuale X sul campo (0-100)
+  y: number; // Posizione percentuale Y sul campo (0-100)
   role: string; // Ruolo del giocatore (es. POR, DC, CC, ATT)
   photo: string; // URL della foto del giocatore
 }
@@ -23,41 +31,61 @@ interface FormationData {
 // Dati dei giocatori hardcodati - Questi dovrebbero venire dal tuo backend!
 const initialPlayersByFormation: FormationData = {
   '1-4-1': [
-    { id: '1', name: 'Manuel', x: 50, y: 10, role: 'POR', photo: 'https://via.placeholder.com/50' },
-    { id: '2', name: 'Virgil', x: 50, y: 25, role: 'DC', photo: 'https://via.placeholder.com/50' },
-    { id: '3', name: 'Luka', x: 30, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '4', name: 'Kylian', x: 42, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '5', name: 'Cristiano', x: 55, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '6', name: 'Leo', x: 68, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '7', name: 'Neymar', x: 50, y: 58, role: 'ATT', photo: 'https://via.placeholder.com/50' },
+    { id: '1', name: 'Manuel', x: 50, y: 10, role: 'POR', photo: 'https://via.placeholder.com/60/FFD700/000000?text=P' },
+    { id: '2', name: 'Virgil', x: 50, y: 25, role: 'DC', photo: 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=D' },
+    { id: '3', name: 'Luka', x: 30, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '4', name: 'Kylian', x: 42, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '5', name: 'Cristiano', x: 55, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '6', name: 'Leo', x: 68, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '7', name: 'Neymar', x: 50, y: 58, role: 'ATT', photo: 'https://via.placeholder.com/60/FFA500/FFFFFF?text=A' },
   ],
   '2-3-1': [
-    { id: '1', name: 'Manuel', x: 50, y: 10, role: 'POR', photo: 'https://via.placeholder.com/50' },
-    { id: '2', name: 'Virgil', x: 35, y: 25, role: 'DC', photo: 'https://via.placeholder.com/50' },
-    { id: '3', name: 'Luka', x: 65, y: 25, role: 'DC', photo: 'https://via.placeholder.com/50' },
-    { id: '4', name: 'Cristiano', x: 33, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '5', name: 'Kylian', x: 50, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '6', name: 'Neymar', x: 67, y: 41, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '7', name: 'Leo', x: 50, y: 58, role: 'ATT', photo: 'https://via.placeholder.com/50' },
+    { id: '1', name: 'Manuel', x: 50, y: 10, role: 'POR', photo: 'https://via.placeholder.com/60/FFD700/000000?text=P' },
+    { id: '2', name: 'Virgil', x: 35, y: 25, role: 'DC', photo: 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=D' },
+    { id: '3', name: 'Luka', x: 65, y: 25, role: 'DC', photo: 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=D' },
+    { id: '4', name: 'Cristiano', x: 33, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '5', name: 'Kylian', x: 50, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '6', name: 'Neymar', x: 67, y: 41, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '7', name: 'Leo', x: 50, y: 58, role: 'ATT', photo: 'https://via.placeholder.com/60/FFA500/FFFFFF?text=A' },
   ],
   '3-1-2': [
-    { id: '1', name: 'Manuel', x: 50, y: 10, role: 'POR', photo: 'https://via.placeholder.com/50' },
-    { id: '2', name: 'Virgil', x: 25, y: 30, role: 'DC', photo: 'https://via.placeholder.com/50' },
-    { id: '3', name: 'Luka', x: 50, y: 30, role: 'DC', photo: 'https://via.placeholder.com/50' },
-    { id: '4', name: 'Cristiano', x: 75, y: 30, role: 'DC', photo: 'https://via.placeholder.com/50' },
-    { id: '5', name: 'Neymar', x: 50, y: 60, role: 'CC', photo: 'https://via.placeholder.com/50' },
-    { id: '6', name: 'Leo', x: 35, y: 85, role: 'ATT', photo: 'https://via.placeholder.com/50' },
-    { id: '7', name: 'Kylian', x: 65, y: 85, role: 'ATT', photo: 'https://via.placeholder.com/50' },
+    { id: '1', name: 'Manuel', x: 50, y: 10, role: 'POR', photo: 'https://via.placeholder.com/60/FFD700/000000?text=P' },
+    { id: '2', name: 'Virgil', x: 25, y: 30, role: 'DC', photo: 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=D' },
+    { id: '3', name: 'Luka', x: 50, y: 30, role: 'DC', photo: 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=D' },
+    { id: '4', name: 'Cristiano', x: 75, y: 30, role: 'DC', photo: 'https://via.placeholder.com/60/4CAF50/FFFFFF?text=D' },
+    { id: '5', name: 'Neymar', x: 50, y: 60, role: 'CC', photo: 'https://via.placeholder.com/60/007bff/FFFFFF?text=C' },
+    { id: '6', name: 'Leo', x: 35, y: 85, role: 'ATT', photo: 'https://via.placeholder.com/60/FFA500/FFFFFF?text=A' },
+    { id: '7', name: 'Kylian', x: 65, y: 85, role: 'ATT', photo: 'https://via.placeholder.com/60/FFA500/FFFFFF?text=A' },
   ]
 };
 
-export default function TeamScreen() { // Rinominato da FormationScreen a TeamScreen per coerenza col nome del file
-  const [formation, setFormation] = useState<keyof typeof initialPlayersByFormation>('1-4-1'); // Tipizzato formation
-  const [modalVisible, setModalVisible] = useState(false);
-  const [fadeAnim] = useState(new Animated.Value(1));
-  const dynamicSize = Math.min(width, height) * 0.1;
-  const [availableFormations, setAvailableFormations] = useState<string[]>(Object.keys(initialPlayersByFormation)); // Stato per le formazioni disponibili
-  const [teamPlayers, setTeamPlayers] = useState<FormationData>(initialPlayersByFormation); // Stato per i dati dei giocatori
+export default function TeamScreen() {
+  const [formation, setFormation] = useState<keyof typeof initialPlayersByFormation>('1-4-1');
+  const [isModalOpen, setIsModalOpen] = useState(false); // Stato per il Dialog di Shadcn UI
+  const [availableFormations, setAvailableFormations] = useState<string[]>(Object.keys(initialPlayersByFormation));
+  const [teamPlayers, setTeamPlayers] = useState<FormationData>(initialPlayersByFormation);
+  const [isAnimating, setIsAnimating] = useState(false); // Per l'animazione di fade
+  const fieldRef = useRef<HTMLDivElement>(null); // Riferimento al campo per ottenere le dimensioni
+  const [playerSize, setPlayerSize] = useState(60); // Dimensione base dei giocatori in px
+
+  // Calcola la dimensione dinamica dei giocatori in base alla larghezza del campo
+  useEffect(() => {
+    const handleResize = () => {
+      if (fieldRef.current) {
+        // La dimensione dei giocatori sarà una percentuale della larghezza del campo
+        // Ho scelto 8vw (8% della larghezza del viewport) come dimensione base reattiva.
+        // Puoi aggiustare 8 in base a quanto grandi vuoi i giocatori.
+        const newPlayerSize = Math.min(fieldRef.current.offsetWidth * 0.1, 70); // Max 70px per evitare giocatori troppo grandi
+        setPlayerSize(newPlayerSize);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Esegui al mount iniziale
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   // Carica le formazioni e i giocatori dal backend all'inizio
   useEffect(() => {
@@ -65,23 +93,9 @@ export default function TeamScreen() { // Rinominato da FormationScreen a TeamSc
       try {
         // TODO: Fai una chiamata al tuo backend per ottenere le formazioni disponibili
         // e i dettagli dei giocatori per ogni formazione.
-        // Esempio:
-        // const formationsResponse = await fetch('/api/formations');
-        // if (formationsResponse.ok) {
-        //   const data: FormationData = await formationsResponse.json();
-        //   setTeamPlayers(data);
-        //   setAvailableFormations(Object.keys(data));
-        //   // Assicurati che la formazione iniziale esista nei dati caricati
-        //   if (data['1-4-1']) {
-        //     setFormation('1-4-1');
-        //   } else if (Object.keys(data).length > 0) {
-        //     setFormation(Object.keys(data)[0] as keyof typeof data);
-        //   }
-        // } else {
-        //   console.error('Errore nel recupero delle formazioni:', formationsResponse.status);
-        // }
+        // Simulazione di un ritardo per il caricamento dei dati
+        await new Promise(resolve => setTimeout(resolve, 500)); 
 
-        // Per ora, useremo i dati mockati iniziali
         setTeamPlayers(initialPlayersByFormation);
         setAvailableFormations(Object.keys(initialPlayersByFormation));
 
@@ -95,154 +109,160 @@ export default function TeamScreen() { // Rinominato da FormationScreen a TeamSc
 
   const currentPlayers = teamPlayers[formation] || [];
 
-  const animatePlayers = (newFormationKey: keyof typeof initialPlayersByFormation) => { // Tipizzato l'argomento
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
+  const animatePlayers = (newFormationKey: keyof typeof initialPlayersByFormation) => {
+    setIsAnimating(true); // Inizia l'animazione di fade-out
+    setTimeout(() => {
       setFormation(newFormationKey);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    });
+      setIsAnimating(false); // Finisce l'animazione di fade-in
+    }, 300); // Durata della transizione CSS (300ms)
   };
 
   const handleConfirmFormation = async () => {
     // TODO: Fai una chiamata POST al tuo backend per salvare la formazione attuale.
-    // Invierai la `formation` selezionata e, se necessario, l'ID della squadra o dell'utente.
-    // Esempio:
-    // try {
-    //   const response = await fetch('/api/saveFormation', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       // 'Authorization': `Bearer ${tuoTokenUtente}` // Se usi autenticazione
-    //     },
-    //     body: JSON.stringify({ formation: formation, players: currentPlayers }),
-    //   });
-    //   if (response.ok) {
-    //     Alert.alert('Successo', 'Formazione salvata con successo!');
-    //   } else {
-    //     const errorData = await response.json();
-    //     Alert.alert('Errore', errorData.message || 'Errore nel salvare la formazione.');
-    //   }
-    // } catch (error) {
-    //   console.error('Errore nel salvataggio formazione:', error);
-    //   Alert.alert('Errore', 'Si è verificato un problema nel salvare la formazione.');
-    // }
     console.log(`Simulazione salvataggio formazione: ${formation}`);
     alert(`Formazione "${formation}" confermata (simulato)!`);
   };
 
+  // Funzione per filtrare i sostituti
+  const substitutes = Object.values(teamPlayers)
+    .flat()
+    .filter(p => !currentPlayers.some(cp => cp.id === p.id))
+    .filter((value, index, self) => // Rimuove duplicati per id
+        index === self.findIndex((t) => (
+            t.id === value.id
+        ))
+    );
+
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>I Tuoi Gladiatori</Text>
-        <Text style={styles.currentFormationDisplay}>Formazione attuale: {formation}</Text>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
-            <Text style={styles.dropdownButtonText}>Scegli Formazione: {formation}</Text>
-          </TouchableOpacity>
-        </View>
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8 flex flex-col items-center font-sans">
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-center mb-6 text-green-400
+                     [text-shadow:_0_0_10px_rgba(74,222,128,0.5),_0_0_20px_rgba(74,222,128,0.3)]">
+        I Tuoi Gladiatori
+      </h1>
+      <p className="text-lg sm:text-xl text-center mb-6 text-gray-300">
+        Formazione attuale: <span className="font-semibold text-green-300">{formation}</span>
+      </p>
 
-        <Modal visible={modalVisible} transparent={true} animationType="fade">
-          <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
-            <View style={styles.modalContent}>
+      <div className="w-full max-w-lg mb-8">
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors duration-200 text-lg">
+              Scegli Formazione: {formation}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-gray-800 border-green-700/60 text-white rounded-xl shadow-lg max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-center text-green-300">Seleziona Formazione</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
               {availableFormations.filter(f => f !== formation).map(f => (
-                <TouchableOpacity key={f} onPress={() => { setModalVisible(false); animatePlayers(f as keyof typeof initialPlayersByFormation); }}>
-                  <Text style={styles.modalItem}>{f}</Text>
-                </TouchableOpacity>
+                <Button
+                  key={f}
+                  variant="ghost"
+                  className="w-full justify-center text-lg py-3 hover:bg-gray-700 text-gray-200 hover:text-green-300 transition-colors duration-200"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    animatePlayers(f as keyof typeof initialPlayersByFormation);
+                  }}
+                >
+                  {f}
+                </Button>
               ))}
-            </View>
-          </Pressable>
-        </Modal>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-        <View style={styles.fieldBackgroundContainer}>
-          <Image source={backgroundImage} style={styles.fieldBackgroundImage} resizeMode='contain' />
-          <Animated.View style={[styles.fieldOverlay, { opacity: fadeAnim }]}>
-            {currentPlayers.map(player => (
-              <View
-                key={player.id}
-                style={[
-                  styles.playerContainer,
-                  {
-                    position: 'absolute',
-                    left: `${player.x}%`,
-                    top: `${player.y}%`,
-                    transform: [{ translateX: -dynamicSize / 2 }, { translateY: -dynamicSize / 2 }],
-                    width: dynamicSize,
-                    height: dynamicSize,
-                  }
-                ]}
-              >
-                <Image source={{ uri: player.photo }} style={styles.photo} />
-                <Text style={styles.playerName}>{player.name}</Text>
-                <Text style={styles.roleAcronym}>{player.role}</Text>
-              </View>
-            ))}
-          </Animated.View>
-        </View>
+      <div
+        ref={fieldRef}
+        className="w-full max-w-2xl aspect-[4/5] bg-cover bg-center rounded-2xl shadow-2xl overflow-hidden relative border-4 border-green-700/60 mb-8"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      >
+        <div className={cn(
+          "absolute inset-0 transition-opacity duration-300",
+          isAnimating ? "opacity-0" : "opacity-100"
+        )}>
+          {currentPlayers.map(player => (
+            <div
+              key={player.id}
+              className="absolute flex flex-col items-center justify-center p-0.5"
+              style={{
+                left: `${player.x}%`,
+                top: `${player.y}%`,
+                transform: `translate(-50%, -50%)`, // Centra l'elemento sul punto (x,y)
+                width: playerSize, // Usa la dimensione dinamica
+                height: playerSize,
+              }}
+            >
+              <img
+                src={player.photo}
+                alt={player.name}
+                className="w-full h-full rounded-full border-2 border-purple-500 object-cover shadow-lg"
+              />
+              <p className="text-xs sm:text-sm text-white font-semibold text-center mt-0.5 leading-none">
+                {player.name}
+              </p>
+              <span className="text-xxs sm:text-xs font-bold text-yellow-300 text-center uppercase leading-none">
+                {player.role}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        <Text style={styles.substitutesTitle}>Sostituti</Text>
-        {/* Assumiamo che i sostituti siano gli altri giocatori non in campo,
-            o un elenco separato dal backend. Qui usiamo un esempio di slice. */}
-        <FlatList
-          horizontal
-          data={Object.values(teamPlayers).flat().filter(p => !currentPlayers.some(cp => cp.id === p.id))} // Mostra tutti i giocatori non nella formazione attuale
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.subCard}>
-              <Image source={{ uri: item.photo }} style={styles.subPhoto} />
-              <Text style={styles.subName}>{item.name}</Text>
-              <Text style={styles.roleAcronym}>{item.role}</Text>
-            </View>
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 mt-4 text-green-300">Sostituti</h2>
+      
+      {/* Scroll orizzontale per i sostituti */}
+      <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
+        <div className="flex space-x-4 px-2"> {/* Aggiunto padding orizzontale per ScrollView */}
+          {substitutes.map(player => (
+            <div
+              key={player.id}
+              className="flex-shrink-0 w-28 h-auto bg-gray-800 rounded-lg shadow-lg p-3 flex flex-col items-center justify-center border border-green-700/30 transform hover:scale-105 transition-transform duration-200"
+            >
+              <img
+                src={player.photo}
+                alt={player.name}
+                className="w-16 h-16 rounded-full mb-2 object-cover border-2 border-purple-500"
+              />
+              <p className="text-sm font-semibold text-center text-white leading-tight">{player.name}</p>
+              <span className="text-xs font-bold text-yellow-300 text-center uppercase leading-tight">{player.role}</span>
+            </div>
+          ))}
+          {substitutes.length === 0 && (
+            <p className="text-gray-400 text-center w-full">Nessun sostituto disponibile.</p>
           )}
-          showsHorizontalScrollIndicator={false}
-        />
+        </div>
+      </div>
 
-        <TouchableOpacity style={styles.button} onPress={handleConfirmFormation}>
-          <Text style={styles.buttonText}>Conferma Formazione</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      <Button
+        onClick={handleConfirmFormation}
+        className="w-full max-w-sm bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl mt-8 mb-4 text-xl transition-colors duration-200"
+      >
+        Conferma Formazione
+      </Button>
+    </div>
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContainer: { flexGrow: 1, backgroundColor: '#f0f0f0' }, // Aggiunto colore di sfondo
-  container: { flex: 1, padding: 20, backgroundColor: '#f0f0f0' },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10, color: '#333' },
-  currentFormationDisplay: { fontSize: 18, textAlign: 'center', marginBottom: 10, color: '#555' }, // Nuovo stile per la formazione attuale
-  header: { flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10 },
-  dropdownButton: { backgroundColor: '#4B0082', padding: 10, borderRadius: 8 },
-  dropdownButtonText: { color: '#fff', fontWeight: 'bold' },
-  modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10 },
-  modalItem: { padding: 10, fontSize: 16, color: '#333' },
-  fieldBackgroundContainer: {
-    width: '100%',
-    aspectRatio: 4 / 5,
-    marginBottom: 20,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    borderRadius: 20,
-    overflow: 'hidden'
-  },
-  fieldBackgroundImage: { position: 'absolute', width: '100%', height: '100%', borderRadius: 20 },
-  fieldOverlay: { flex: 1, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' },
-  playerContainer: { alignItems: 'center', justifyContent: 'center' }, // Centra il contenuto del giocatore
-  photo: { width: '100%', height: '100%', borderRadius: 25, borderWidth: 2, borderColor: '#4B0082' }, // Aggiunto bordo
-  playerName: { fontSize: 12, textAlign: 'center', color: '#fff', marginTop: 2, textShadowColor: 'rgba(0, 0, 0, 0.75)', textShadowOffset: { width: -1, height: 1 }, textShadowRadius: 5 }, // Colore testo per leggibilità
-  roleAcronym: { fontSize: 10, textAlign: 'center', fontWeight: 'bold', color: '#eee', textShadowColor: 'rgba(0, 0, 0, 0.75)', textShadowOffset: { width: -1, height: 1 }, textShadowRadius: 5 }, // Colore testo per leggibilità
-  substitutesTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 10, marginTop: 20, color: '#333' },
-  button: { backgroundColor: '#4B0082', padding: 12, borderRadius: 8, marginTop: 20, alignItems: 'center' }, // Aumentato marginTop
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  subCard: { backgroundColor: '#fff', padding: 10, borderRadius: 8, alignItems: 'center', marginRight: 10, width: 90, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 }, // Migliorata estetica della card
-  subPhoto: { width: 60, height: 60, borderRadius: 30, marginBottom: 5, borderWidth: 1, borderColor: '#ddd' },
-  subName: { fontSize: 14, fontWeight: '500', textAlign: 'center', color: '#333' },
-});
+// Stili per la custom scrollbar (da aggiungere a src/app.css o global.css)
+/*
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #374151; // gray-700
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4CAF50; // football-green o un verde simile
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #22c55e; // green-500
+}
+*/

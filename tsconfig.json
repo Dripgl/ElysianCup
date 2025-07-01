@@ -25,22 +25,9 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src",
-    "components",
-    "constants",
-    "hooks",
-    "point",
-    "index.html",
-    "vite.config.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
+  "include": ["src"],
   "exclude": [
     "node_modules",
-    "babel.config.js",
-    "metro.config.js",
-    ".expo",
     "dist"
   ],
   

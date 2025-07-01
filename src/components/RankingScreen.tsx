@@ -1,110 +1,152 @@
-import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-// Rimosse le importazioni di Firebase Firestore
-// import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
-// import { app } from '../FirebaseConfig'; 
+// src/components/RankingScreen.tsx
+import { useEffect, useState } from 'react';
+// Importa icone da React Icons
+import { FaTrophy, FaMedal } from 'react-icons/fa'; // FaTrophy per il titolo, FaMedal per i goals
+import { ImSpinner2 } from 'react-icons/im'; // Per il caricamento
 
-// Non è più necessaria la riga const db = getFirestore(app);
+// Importazioni Shadcn UI
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-// Definizione dell'interfaccia per il tipo di dato di una squadra in classifica
+// --- Definizione delle interfacce per i tipi di dati ---
 interface TeamRanking {
   id: string;
   team: string;
   goals: number;
-  lastMatches: ('W' | 'L' | 'D')[]; // Assumendo 'D' per draw
+  lastMatches: ('W' | 'L' | 'D')[]; // 'W'in, 'L'oss, 'D'raw
 }
 
-const MatchSquare = ({ result }: { result: 'W' | 'L' | 'D' }) => { // Aggiunto tipo per 'result'
-  let backgroundColor: string; // Aggiunto tipo per backgroundColor
-  if (result === 'W') backgroundColor = 'green';
-  else if (result === 'L') backgroundColor = 'red';
-  else backgroundColor = 'gray'; // 'D' per draw, o qualsiasi altro valore non specificato
-  return <View style={[styles.square, { backgroundColor }]} />;
+// Componente per i quadratini dei risultati delle ultime partite
+const MatchSquare = ({ result }: { result: 'W' | 'L' | 'D' }) => {
+  let bgColorClass: string;
+  if (result === 'W') bgColorClass = 'bg-green-500'; // Vittoria
+  else if (result === 'L') bgColorClass = 'bg-red-500';   // Sconfitta // <-- Corretto qui: da 'bgColor' a 'bgColorClass'
+  else bgColorClass = 'bg-gray-500'; // Pareggio o altro
+  
+  return <div className={`w-4 h-4 sm:w-5 sm:h-5 mx-0.5 rounded-sm shadow-sm ${bgColorClass}`} />;
 };
 
 const RankingScreen = () => {
-  const [teams, setTeams] = useState<TeamRanking[]>([]); // Tipizzato lo stato
+  const [teams, setTeams] = useState<TeamRanking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Sostituisci questo listener Firebase con una chiamata al tuo backend.
-    // Puoi fare una chiamata `fetch` per recuperare i dati della classifica.
-    // Considera:
-    // 1. Chiamata singola all'avvio.
-    // 2. Un meccanismo di "pull-to-refresh" se vuoi aggiornamenti su richiesta.
-    // 3. WebSockets se il tuo backend supporta aggiornamenti in tempo reale.
-
     const fetchRanking = async () => {
+      setIsLoading(true);
       try {
-        // Esempio di chiamata fetch:
-        // const response = await fetch('/api/ranking');
-        // if (response.ok) {
-        //   const data: TeamRanking[] = await response.json();
-        //   data.sort((a, b) => b.goals - a.goals); // Ordina per goals decrescente
-        //   setTeams(data);
-        // } else {
-        //   console.error('Errore nel recupero della classifica:', response.status);
-        // }
+        // Simula un ritardo di rete per i dati di esempio
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
 
-        // Dati di esempio (mock data) per testare l'interfaccia senza backend
         const mockData: TeamRanking[] = [
           { id: '1', team: 'Dragons FC', goals: 55, lastMatches: ['W', 'L', 'W', 'D', 'W'] },
           { id: '2', team: 'Phoenix United', goals: 52, lastMatches: ['W', 'W', 'L', 'L', 'W'] },
           { id: '3', team: 'Thunderbirds', goals: 48, lastMatches: ['D', 'W', 'W', 'D', 'L'] },
           { id: '4', team: 'Night Hawks', goals: 45, lastMatches: ['L', 'L', 'W', 'W', 'D'] },
+          { id: '5', team: 'Golden Eagles', goals: 40, lastMatches: ['W', 'D', 'L', 'W', 'D'] },
+          { id: '6', team: 'Steel Wolves', goals: 38, lastMatches: ['L', 'W', 'D', 'L', 'L'] },
         ];
-        mockData.sort((a, b) => b.goals - a.goals); // Ordina anche i dati mock
+        
+        // Ordina per goals decrescente
+        mockData.sort((a, b) => b.goals - a.goals); 
         setTeams(mockData);
 
       } catch (error) {
         console.error('Errore durante il recupero della classifica (simulato):', error);
-        // Puoi mostrare un messaggio di errore all'utente qui
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchRanking(); // Esegui la funzione al montaggio del componente
-
-    // La funzione di unsubscribe del listener di Firebase non è più necessaria.
-    // return unsubscribe;
-  }, []); // L'array vuoto fa sì che l'effetto si esegua una sola volta al montaggio
+    fetchRanking();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🏆 Classifica Squadre</Text>
-      <View style={styles.headerRow}>
-        <Text style={styles.headerCell}>Pos</Text> {/* Cambiato da Rank a Pos per brevità */}
-        <Text style={styles.headerCell}>Squadra</Text> {/* Cambiato da Team a Squadra */}
-        <Text style={styles.headerCell}>Goals</Text>
-        <Text style={styles.headerCell}>Ultime 5</Text> {/* Cambiato da Last 5 a Ultime 5 */}
-      </View>
-      <FlatList
-        data={teams}
-        keyExtractor={item => item.id}
-        renderItem={({ item, index }) => (
-          <View style={styles.row}>
-            <Text style={styles.cell}>{index + 1}</Text>
-            <Text style={styles.cell}>{item.team}</Text>
-            <Text style={styles.cell}>{item.goals}</Text>
-            <View style={styles.last5}>
-              {item.lastMatches.map((res, i) => (
-                <MatchSquare key={i} result={res} />
-              ))}
-            </View>
-          </View>
-        )}
-      />
-    </View>
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8 font-sans">
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-center mb-8 text-green-400
+                     [text-shadow:_0_0_10px_rgba(74,222,128,0.5),_0_0_20px_rgba(74,222,128,0.3)]">
+        <FaTrophy className="inline-block mr-3 text-yellow-400" /> Classifica Torneo
+      </h1>
+
+      <Card className="bg-gray-800 border-green-700/60 shadow-xl mb-8 transform hover:scale-[1.01] transition-transform duration-300">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-green-300 flex items-center justify-center gap-2">
+            <FaMedal className="text-yellow-400" /> Posizioni Attuali
+          </CardTitle>
+          <CardDescription className="text-gray-400 text-sm sm:text-base">
+            Aggiornato in tempo reale.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-48">
+              <ImSpinner2 className="h-8 w-8 animate-spin text-green-400" />
+              <p className="ml-3 text-lg text-gray-300">Caricamento classifica...</p>
+            </div>
+          ) : (
+            typeof Table !== 'undefined' ? (
+              <div className="overflow-x-auto">
+                <Table className="min-w-full">
+                  <TableHeader>
+                    <TableRow className="bg-gray-700 hover:bg-gray-600">
+                      <TableHead className="w-[60px] text-gray-300">Pos</TableHead>
+                      <TableHead className="text-gray-300">Squadra</TableHead>
+                      <TableHead className="text-right text-gray-300">Goals</TableHead>
+                      <TableHead className="text-center text-gray-300">Ultime 5</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {teams.map((item, index) => (
+                      <TableRow key={item.id} className="hover:bg-gray-700 border-gray-700">
+                        <TableCell className="font-bold text-green-300">{index + 1}</TableCell>
+                        <TableCell className="font-medium text-white">{item.team}</TableCell>
+                        <TableCell className="text-right text-yellow-300 font-semibold">{item.goals}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex justify-center">
+                            {item.lastMatches.map((res, i) => (
+                              <MatchSquare key={i} result={res} />
+                            ))}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              // Fallback se la componente Table non è installata
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 bg-gray-700 rounded-md font-bold text-gray-300">
+                  <span className="w-1/12">Pos</span>
+                  <span className="w-5/12">Squadra</span>
+                  <span className="w-2/12 text-right">Goals</span>
+                  <span className="w-4/12 text-center">Ultime 5</span>
+                </div>
+                {teams.map((item, index) => (
+                  <div key={item.id} className="flex justify-between items-center p-3 bg-gray-700/50 rounded-md text-white">
+                    <span className="w-1/12 font-bold text-green-300">{index + 1}</span>
+                    <span className="w-5/12">{item.team}</span>
+                    <span className="w-2/12 text-right font-semibold text-yellow-300">{item.goals}</span>
+                    <span className="w-4/12 flex justify-center">
+                      {item.lastMatches.map((res, i) => (
+                        <MatchSquare key={i} result={res} />
+                      ))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', padding: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: 'white', textAlign: 'center', marginVertical: 16 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  headerCell: { flex: 1, color: 'white', fontWeight: 'bold' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#444' },
-  cell: { flex: 1, color: 'white' },
-  last5: { flexDirection: 'row' },
-  square: { width: 12, height: 12, marginHorizontal: 2, borderRadius: 2 },
-});
 
 export default RankingScreen;
